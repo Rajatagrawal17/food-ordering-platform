@@ -61,25 +61,20 @@ export const getRedisClient = () => {
   }
 
   const pwdLength = password.length;
-  const pwdFirstChar = password.length > 0 ? password[0] : '';
-  const pwdLastChar = password.length > 0 ? password[password.length - 1] : '';
 
   logger.info({
-    redis_password_audit: {
-      length: pwdLength,
-      firstChar: pwdFirstChar,
-      lastChar: pwdLastChar,
+    redis_diagnostics: {
       protocol,
       hostname: host,
       port,
       usernamePresent: !!username,
+      passwordLength: pwdLength,
       tlsEnabled: protocol === 'rediss:',
     }
-  }, 'Redis password audit details');
+  }, 'Redis connection diagnostics');
 
-  if (pwdLength === 8) {
-    logger.error('REDIS_URI secret on Render is incorrect (password length is 8). Please replace it from the Upstash dashboard.');
-    throw new Error('REDIS_URI secret on Render is incorrect (password length is 8)');
+  if (password === '********') {
+    logger.error('REDIS_URI secret on Render contains the literal mask ******** instead of the real Upstash secret. Please replace it with the actual password in the Render environment settings.');
   }
 
   const redisOptions = {
