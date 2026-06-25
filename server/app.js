@@ -91,6 +91,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(csrfProtection);
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', { stream: logger.stream }));
+let generalLimiterMiddleware = (req, res, next) => next();
+let authLimiterMiddleware = (req, res, next) => next();
+let checkoutLimiterMiddleware = (req, res, next) => next();
+
 const createRedisStore = () => {
   return new RedisStore({
     sendCommand: async (...args) => {
@@ -103,32 +107,52 @@ const createRedisStore = () => {
   });
 };
 
-const generalLimiter = rateLimit({
-  store: createRedisStore(),
-  windowMs: 15 * 60 * 1000,
-  limit: 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-  passOnStoreError: true,
+const redisClient = getRedisClient();
+
+redisClient.on('ready', () => {
+  const general = rateLimit({
+    store: createRedisStore(),
+    windowMs: 15 * 60 * 1000,
+    limit: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    passOnStoreError: true,
+  });
+
+  const auth = rateLimit({
+    store: createRedisStore(),
+    windowMs: 15 * 60 * 1000,
+    limit: 15,
+    standardHeaders: true,
+    legacyHeaders: false,
+    passOnStoreError: true,
+  });
+
+  const checkout = rateLimit({
+    store: createRedisStore(),
+    windowMs: 10 * 60 * 1000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    passOnStoreError: true,
+  });
+
+  generalLimiterMiddleware = general;
+  authLimiterMiddleware = auth;
+  checkoutLimiterMiddleware = checkout;
 });
 
-const authLimiter = rateLimit({
-  store: createRedisStore(),
-  windowMs: 15 * 60 * 1000,
-  limit: 15,
-  standardHeaders: true,
-  legacyHeaders: false,
-  passOnStoreError: true,
-});
+const generalLimiter = (req, res, next) => {
+  generalLimiterMiddleware(req, res, next);
+};
 
-const checkoutLimiter = rateLimit({
-  store: createRedisStore(),
-  windowMs: 10 * 60 * 1000,
-  limit: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  passOnStoreError: true,
-});
+const authLimiter = (req, res, next) => {
+  authLimiterMiddleware(req, res, next);
+};
+
+const checkoutLimiter = (req, res, next) => {
+  checkoutLimiterMiddleware(req, res, next);
+};
 
 app.use(generalLimiter);
 

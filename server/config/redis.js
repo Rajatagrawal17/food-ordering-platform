@@ -10,52 +10,95 @@ export const getRedisClient = () => {
 
   const redisUri = process.env.REDIS_URI ?? 'redis://127.0.0.1:6379';
 
-  let cleanUri = redisUri.trim();
-  if ((cleanUri.startsWith('"') && cleanUri.endsWith('"')) || (cleanUri.startsWith("'") && cleanUri.endsWith("'"))) {
-    cleanUri = cleanUri.slice(1, -1);
+  const cleanUri = redisUri.trim().replace(/^['"]|['"]$/g, '');
+
+  let protocol = 'redis:';
+  let host = '127.0.0.1';
+  let port = 6379;
+  let username = '';
+  let password = '';
+
+  try {
+    const protocolSplit = cleanUri.split('://');
+    if (protocolSplit.length > 1) {
+      protocol = protocolSplit[0] + ':';
+      const rest = protocolSplit[1];
+      const atSplit = rest.lastIndexOf('@');
+      if (atSplit !== -1) {
+        const credentials = rest.substring(0, atSplit);
+        const hostPort = rest.substring(atSplit + 1);
+
+        const colonIndex = credentials.indexOf(':');
+        if (colonIndex !== -1) {
+          username = credentials.substring(0, colonIndex);
+          password = credentials.substring(colonIndex + 1);
+        } else {
+          username = credentials;
+        }
+
+        const hostPortSplit = hostPort.split(':');
+        host = hostPortSplit[0];
+        if (hostPortSplit.length > 1) {
+          port = parseInt(hostPortSplit[1], 10);
+        }
+      } else {
+        const hostPortSplit = rest.split(':');
+        host = hostPortSplit[0];
+        if (hostPortSplit.length > 1) {
+          port = parseInt(hostPortSplit[1], 10);
+        }
+      }
+    }
+  } catch (err) {
+    logger.error({ err }, 'Failed to parse Redis URI manually');
   }
 
   try {
-    const parsedUrl = new URL(cleanUri);
-
-    logger.info({
-      redis_diagnostics: {
-        protocol: parsedUrl.protocol,
-        hostname: parsedUrl.hostname,
-        port: parsedUrl.port || '6379',
-        usernamePresent: !!parsedUrl.username,
-        passwordLength: parsedUrl.password ? parsedUrl.password.length : 0,
-        tlsEnabled: parsedUrl.protocol === 'rediss:',
-      }
-    }, 'Redis connection diagnostics');
-
-    const redisOptions = {
-      host: parsedUrl.hostname,
-      port: parsedUrl.port ? parseInt(parsedUrl.port, 10) : 6379,
-      username: parsedUrl.username ? decodeURIComponent(parsedUrl.username) : undefined,
-      password: parsedUrl.password ? decodeURIComponent(parsedUrl.password) : undefined,
-      maxRetriesPerRequest: null,
-      enableReadyCheck: true,
-      retryStrategy: (times) => {
-        return Math.min(times * 500, 10000);
-      },
-    };
-
-    if (parsedUrl.protocol === 'rediss:') {
-      redisOptions.tls = {};
-    }
-
-    redisClient = new Redis(redisOptions);
-  } catch (error) {
-    logger.error({ error }, 'Failed to parse Redis connection URI or initialize Redis client');
-    redisClient = new Redis(cleanUri, {
-      maxRetriesPerRequest: null,
-      enableReadyCheck: true,
-      retryStrategy: (times) => {
-        return Math.min(times * 500, 10000);
-      },
-    });
+    if (username) username = decodeURIComponent(username);
+    if (password) password = decodeURIComponent(password);
+  } catch (err) {
+    logger.error({ err }, 'Failed to decode credentials');
   }
+
+  const pwdLength = password.length;
+  const pwdFirstChar = password.length > 0 ? password[0] : '';
+  const pwdLastChar = password.length > 0 ? password[password.length - 1] : '';
+
+  logger.info({
+    redis_password_audit: {
+      length: pwdLength,
+      firstChar: pwdFirstChar,
+      lastChar: pwdLastChar,
+      protocol,
+      hostname: host,
+      port,
+      usernamePresent: !!username,
+      tlsEnabled: protocol === 'rediss:',
+    }
+  }, 'Redis password audit details');
+
+  if (pwdLength === 8) {
+    logger.error('REDIS_URI secret on Render is incorrect (password length is 8). Please replace it from the Upstash dashboard.');
+    throw new Error('REDIS_URI secret on Render is incorrect (password length is 8)');
+  }
+
+  const redisOptions = {
+    host,
+    port,
+    username: username || undefined,
+    password: password || undefined,
+    maxRetriesPerRequest: null,
+    enableReadyCheck: true,
+    retryStrategy: (times) => {
+      return Math.min(times * 500, 10000);
+    },
+  };
+
+  if (protocol === 'rediss:') {
+    redisOptions.tls = {};
+  }
+
+  redisClient = new Redis(redisOptions);
 
   redisClient.on('connect', () => {
     logger.info('Redis connecting...');
@@ -76,5 +119,6 @@ export const getRedisClient = () => {
 
   return redisClient;
 };
+
 
 
