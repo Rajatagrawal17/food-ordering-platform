@@ -10,10 +10,46 @@ export const getRedisClient = () => {
 
   const redisUri = process.env.REDIS_URI ?? 'redis://127.0.0.1:6379';
 
-  redisClient = new Redis(redisUri, {
-    maxRetriesPerRequest: null,
-    enableReadyCheck: true,
-  });
+  let cleanUri = redisUri.trim();
+  if ((cleanUri.startsWith('"') && cleanUri.endsWith('"')) || (cleanUri.startsWith("'") && cleanUri.endsWith("'"))) {
+    cleanUri = cleanUri.slice(1, -1);
+  }
+
+  try {
+    const parsedUrl = new URL(cleanUri);
+
+    logger.info({
+      redis_diagnostics: {
+        protocol: parsedUrl.protocol,
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port || '6379',
+        usernamePresent: !!parsedUrl.username,
+        passwordLength: parsedUrl.password ? parsedUrl.password.length : 0,
+        tlsEnabled: parsedUrl.protocol === 'rediss:',
+      }
+    }, 'Redis connection diagnostics');
+
+    const redisOptions = {
+      host: parsedUrl.hostname,
+      port: parsedUrl.port ? parseInt(parsedUrl.port, 10) : 6379,
+      username: parsedUrl.username ? decodeURIComponent(parsedUrl.username) : undefined,
+      password: parsedUrl.password ? decodeURIComponent(parsedUrl.password) : undefined,
+      maxRetriesPerRequest: null,
+      enableReadyCheck: true,
+    };
+
+    if (parsedUrl.protocol === 'rediss:') {
+      redisOptions.tls = {};
+    }
+
+    redisClient = new Redis(redisOptions);
+  } catch (error) {
+    logger.error({ error }, 'Failed to parse Redis connection URI or initialize Redis client');
+    redisClient = new Redis(cleanUri, {
+      maxRetriesPerRequest: null,
+      enableReadyCheck: true,
+    });
+  }
 
   redisClient.on('connect', () => {
     logger.info('Redis connecting...');
@@ -29,3 +65,4 @@ export const getRedisClient = () => {
 
   return redisClient;
 };
+
