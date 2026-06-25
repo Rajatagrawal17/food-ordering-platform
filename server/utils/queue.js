@@ -33,13 +33,16 @@ export const backgroundQueue = {
     isWorkerRunning = true;
     logger.info('Background job worker started');
 
-    // Runs in the background
     (async () => {
       const client = getRedisClient();
 
       while (isWorkerRunning) {
         try {
-          // Block-pop from queue, wait up to 5 seconds
+          if (client.status && client.status !== 'ready') {
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+            continue;
+          }
+
           const result = await client.blpop(QUEUE_KEY, 5);
           if (!result) {
             continue;
@@ -59,6 +62,7 @@ export const backgroundQueue = {
           }
         } catch (error) {
           logger.error({ error }, 'Error processing background job');
+          await new Promise((resolve) => setTimeout(resolve, 5000));
         }
       }
     })();

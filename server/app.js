@@ -91,35 +91,43 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(csrfProtection);
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', { stream: logger.stream }));
+const createRedisStore = () => {
+  return new RedisStore({
+    sendCommand: async (...args) => {
+      const client = getRedisClient();
+      if (client.status && client.status !== 'ready') {
+        throw new Error('Redis is not ready');
+      }
+      return await client.call(args[0], ...args.slice(1));
+    },
+  });
+};
 
 const generalLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args) => getRedisClient().call(args[0], ...args.slice(1)),
-  }),
+  store: createRedisStore(),
   windowMs: 15 * 60 * 1000,
   limit: 200,
   standardHeaders: true,
   legacyHeaders: false,
+  passOnStoreError: true,
 });
 
 const authLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args) => getRedisClient().call(args[0], ...args.slice(1)),
-  }),
+  store: createRedisStore(),
   windowMs: 15 * 60 * 1000,
   limit: 15,
   standardHeaders: true,
   legacyHeaders: false,
+  passOnStoreError: true,
 });
 
 const checkoutLimiter = rateLimit({
-  store: new RedisStore({
-    sendCommand: (...args) => getRedisClient().call(args[0], ...args.slice(1)),
-  }),
+  store: createRedisStore(),
   windowMs: 10 * 60 * 1000,
   limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  passOnStoreError: true,
 });
 
 app.use(generalLimiter);

@@ -3,6 +3,9 @@ import { getRedisClient } from '../config/redis.js';
 export const refreshTokenRepository = {
   create: async (payload) => {
     const client = getRedisClient();
+    if (client.status && client.status !== 'ready') {
+      throw new Error('Session store is temporarily unavailable');
+    }
     const key = `session:${payload.token}`;
     const userKey = `user:sessions:${payload.user.toString()}`;
     const ttl = Math.max(0, Math.ceil((new Date(payload.expiresAt).getTime() - Date.now()) / 1000)) || 2592000;
@@ -19,6 +22,9 @@ export const refreshTokenRepository = {
 
   findByToken: async (token) => {
     const client = getRedisClient();
+    if (client.status && client.status !== 'ready') {
+      throw new Error('Session store is temporarily unavailable');
+    }
     const data = await client.get(`session:${token}`);
     if (!data) return null;
     const parsed = JSON.parse(data);
@@ -31,6 +37,9 @@ export const refreshTokenRepository = {
 
   deleteByToken: async (token) => {
     const client = getRedisClient();
+    if (client.status && client.status !== 'ready') {
+      return;
+    }
     const data = await client.get(`session:${token}`);
     if (data) {
       const parsed = JSON.parse(data);
@@ -42,6 +51,9 @@ export const refreshTokenRepository = {
 
   deleteByUser: async (userId) => {
     const client = getRedisClient();
+    if (client.status && client.status !== 'ready') {
+      return;
+    }
     const userKey = `user:sessions:${userId.toString()}`;
     const tokens = await client.smembers(userKey);
     if (tokens.length > 0) {

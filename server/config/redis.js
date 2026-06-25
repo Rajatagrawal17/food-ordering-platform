@@ -36,6 +36,9 @@ export const getRedisClient = () => {
       password: parsedUrl.password ? decodeURIComponent(parsedUrl.password) : undefined,
       maxRetriesPerRequest: null,
       enableReadyCheck: true,
+      retryStrategy: (times) => {
+        return Math.min(times * 500, 10000);
+      },
     };
 
     if (parsedUrl.protocol === 'rediss:') {
@@ -48,6 +51,9 @@ export const getRedisClient = () => {
     redisClient = new Redis(cleanUri, {
       maxRetriesPerRequest: null,
       enableReadyCheck: true,
+      retryStrategy: (times) => {
+        return Math.min(times * 500, 10000);
+      },
     });
   }
 
@@ -59,10 +65,16 @@ export const getRedisClient = () => {
     logger.info('Redis connected and ready');
   });
 
+  let lastErrorLoggedTime = 0;
   redisClient.on('error', (error) => {
-    logger.error({ error }, 'Redis connection error');
+    const now = Date.now();
+    if (now - lastErrorLoggedTime > 30000) {
+      logger.error({ error }, 'Redis connection error');
+      lastErrorLoggedTime = now;
+    }
   });
 
   return redisClient;
 };
+
 

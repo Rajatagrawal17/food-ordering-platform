@@ -105,8 +105,12 @@ export const authService = {
       throw new ApiError(404, 'User not found');
     }
 
-    const token = crypto.randomBytes(32).toString('hex');
     const client = getRedisClient();
+    if (client.status && client.status !== 'ready') {
+      throw new ApiError(503, 'Password reset service is temporarily unavailable');
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
     await client.set(`password-reset:${token}`, user._id.toString(), 'EX', 3600);
 
     const clientOrigin = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
@@ -122,6 +126,10 @@ export const authService = {
   },
   resetPassword: async (token, newPassword) => {
     const client = getRedisClient();
+    if (client.status && client.status !== 'ready') {
+      throw new ApiError(503, 'Password reset service is temporarily unavailable');
+    }
+
     const userId = await client.get(`password-reset:${token}`);
 
     if (!userId) {
