@@ -1,10 +1,11 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { authService } from '../services/authService.js';
 
+const isProduction = process.env.NODE_ENV === 'production';
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
 };
 
 const sendAuthResponse = (res, payload, statusCode) => {
