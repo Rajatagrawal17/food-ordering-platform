@@ -6,8 +6,8 @@ const CSRF_TOKEN_KEY = 'csrfToken';
 export const securityService = {
   refreshCsrfToken: async () => {
     const response = await securityApi.csrfToken();
-    storage.set(CSRF_TOKEN_KEY, response.data.data.csrfToken);
-    return response.data.data.csrfToken;
+    storage.set(CSRF_TOKEN_KEY, response.data.csrfToken);
+    return response.data.csrfToken;
   },
   getCsrfToken: () => storage.get(CSRF_TOKEN_KEY),
 };

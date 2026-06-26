@@ -7,15 +7,15 @@ const USER_KEY = 'currentUser';
 export const authService = {
   register: async (payload) => {
     const response = await authApi.register(payload);
-    storage.set(ACCESS_TOKEN_KEY, response.data.data.accessToken);
-    storage.set(USER_KEY, response.data.data.user);
-    return response.data.data;
+    storage.set(ACCESS_TOKEN_KEY, response.data.accessToken);
+    storage.set(USER_KEY, response.data.user);
+    return response.data;
   },
   login: async (payload) => {
     const response = await authApi.login(payload);
-    storage.set(ACCESS_TOKEN_KEY, response.data.data.accessToken);
-    storage.set(USER_KEY, response.data.data.user);
-    return response.data.data;
+    storage.set(ACCESS_TOKEN_KEY, response.data.accessToken);
+    storage.set(USER_KEY, response.data.user);
+    return response.data;
   },
   logout: async () => {
     await authApi.logout();
@@ -24,14 +24,14 @@ export const authService = {
   },
   refresh: async () => {
     const response = await authApi.refresh();
-    storage.set(ACCESS_TOKEN_KEY, response.data.data.accessToken);
-    storage.set(USER_KEY, response.data.data.user);
-    return response.data.data;
+    storage.set(ACCESS_TOKEN_KEY, response.data.accessToken);
+    storage.set(USER_KEY, response.data.user);
+    return response.data;
   },
   me: async () => {
     const response = await authApi.me();
-    storage.set(USER_KEY, response.data.data);
-    return response.data.data;
+    storage.set(USER_KEY, response.data);
+    return response.data;
   },
   getStoredAuth: () => ({
     token: storage.get(ACCESS_TOKEN_KEY),
