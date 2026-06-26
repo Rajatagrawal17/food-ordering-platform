@@ -122,6 +122,8 @@ All files                    |   35.79 |    20.89 |   34.32 |   35.78 |
 - **CSRF & HSTS Enforcement**: Strict SameSite cookie config, Helmet-secured headers, and 365-day preloaded HSTS prevent clickjacking, session hijacking, and MITM downgrades.
 - **Audit Logging**: Critical mutations (registration, logins, logouts, profile address modifications) are asynchronously stored in a structured Mongoose database collection.
 - **File Upload Limits**: A 5MB request size ceiling is enforced at both the Multer processing and endpoint handlers, combined with a whitelist matching only `image/jpeg`, `image/png`, `image/webp`, and `image/avif` MIME types.
+- **Cross-Origin Auth & CSRF Cookies**: Replaced `SameSite=Lax` cookie policy in `authController.js` and `csrf.js` with `SameSite=None; Secure` in production environments. This allows cross-site requests (e.g. from Vercel to Render) to pass HTTP-only session cookies and CSRF tokens successfully.
+- **Client Unwrapping Fixes**: Resolved double `.data` unwrapping bugs across all client service modules (`securityService`, `authService`, `cartService`, etc.), ensuring the JSON response is correctly parsed without raising undefined reference exceptions.
 
 ### Performance Findings
 - **Cache Warmup & TTL**: The food catalog endpoints `/api/v1/foods` and `/api/v1/foods/:id` are automatically seeded into Redis memory caches on script start. Invalidations are triggered on write mutations (POST/PATCH/DELETE).
