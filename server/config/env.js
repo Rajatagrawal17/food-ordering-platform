@@ -16,6 +16,7 @@ const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   CSRF_SECRET: z.string().min(1).optional(),
+  DISABLE_CSRF: z.string().optional(),
   LOG_LEVEL: z.string().default('info'),
   SENTRY_DSN: z.string().optional(),
   SMTP_HOST: z.string().optional(),

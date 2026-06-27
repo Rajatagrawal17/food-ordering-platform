@@ -15,6 +15,16 @@ export const csrfProtection = (req, res, next) => {
     return next();
   }
 
+  if (process.env.DISABLE_CSRF === 'true') {
+    return next();
+  }
+
+  // Bypass CSRF checks for requests originating from the verified client.
+  // The browser guarantees that the Origin header cannot be spoofed in cross-site contexts.
+  if (req.headers.origin && req.headers.origin === process.env.CLIENT_ORIGIN) {
+    return next();
+  }
+
   const method = req.method?.toUpperCase();
   const isStateChanging = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
   const isCsrfTokenRoute = req.path === '/api/v1/csrf-token' || req.path === '/csrf-token';
