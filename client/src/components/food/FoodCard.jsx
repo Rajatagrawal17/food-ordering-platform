@@ -1,12 +1,18 @@
 import { Link } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
 import { formatCurrency } from '../../utils/formatCurrency';
 import { Button } from '../common/Button';
 
 export const FoodCard = ({ food, onAdd }) => {
   const ratingText = food.rating ? `⭐ ${food.rating.toFixed(1)}` : '⭐ 0.0';
+  const shouldReduceMotion = useReducedMotion();
 
   return (
-    <article className="card">
+    <motion.article
+      className="card"
+      whileHover={shouldReduceMotion ? {} : { y: -4, boxShadow: '0 12px 36px rgba(138,128,116,0.18)' }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="card__media">
         <img src={food.image} alt={food.name} loading="lazy" />
       </div>
@@ -33,6 +39,6 @@ export const FoodCard = ({ food, onAdd }) => {
           </Button>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 };
