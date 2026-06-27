@@ -15,6 +15,12 @@ export const csrfProtection = (req, res, next) => {
     return next();
   }
 
+  // The csrf-token route must always execute csurf to generate the token and define req.csrfToken()
+  const isCsrfTokenRoute = req.path === '/api/v1/csrf-token' || req.path === '/csrf-token';
+  if (isCsrfTokenRoute) {
+    return protection(req, res, next);
+  }
+
   if (process.env.DISABLE_CSRF === 'true') {
     return next();
   }
@@ -27,9 +33,8 @@ export const csrfProtection = (req, res, next) => {
 
   const method = req.method?.toUpperCase();
   const isStateChanging = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
-  const isCsrfTokenRoute = req.path === '/api/v1/csrf-token' || req.path === '/csrf-token';
 
-  if (isStateChanging || isCsrfTokenRoute) {
+  if (isStateChanging) {
     return protection(req, res, next);
   }
 
