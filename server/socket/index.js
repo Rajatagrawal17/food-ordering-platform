@@ -4,7 +4,10 @@ import { verifyAccessToken } from '../utils/token.js';
 let io;
 
 const joinRooms = (socket, user) => {
-  socket.join(`user:${user._id.toString()}`);
+  const userId = user.userId ?? user._id?.toString();
+  if (userId) {
+    socket.join(`user:${userId}`);
+  }
 
   if (user.role === 'admin') {
     socket.join('admins');
