@@ -2,7 +2,7 @@ import { Food } from '../models/Food.js';
 
 export const foodRepository = {
   create: (payload) => Food.create(payload),
-  findById: (id) => Food.findById(id),
+  findById: (id) => Food.findById(id).populate('restaurant', 'name slug image rating'),
   updateById: (id, payload) => Food.findByIdAndUpdate(id, payload, { new: true }),
   deleteById: (id) => Food.findByIdAndDelete(id),
   count: (filter = {}) => Food.countDocuments(filter),
@@ -10,5 +10,6 @@ export const foodRepository = {
     Food.find(filter)
       .skip((page - 1) * limit)
       .limit(limit)
-      .sort(sort),
+      .sort(sort)
+      .populate('restaurant', 'name slug image rating'),
 };

@@ -40,6 +40,7 @@ import wishlistRoutes from './routes/wishlistRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
+import restaurantRoutes from './routes/restaurantRoutes.js';
 import { correlationIdMiddleware } from './middleware/correlation.js';
 import { registerShutdownHandlers } from './utils/shutdown.js';
 
@@ -175,6 +176,7 @@ app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/auth', authLimiter, authRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/foods', foodRoutes);
+app.use('/api/v1/restaurants', restaurantRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/cart', cartRoutes);
 app.use('/api/v1/orders', orderRoutes);

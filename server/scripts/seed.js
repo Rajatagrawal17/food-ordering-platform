@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { connectDatabase } from '../config/db.js';
 import { User } from '../models/User.js';
 import { Food } from '../models/Food.js';
+import { Restaurant } from '../models/Restaurant.js';
 import { Order } from '../models/Order.js';
 import { Cart } from '../models/Cart.js';
 import { Review } from '../models/Review.js';
@@ -41,6 +42,121 @@ const categoryImages = {
   Bowls: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80',
 };
 
+const seedRestaurants = [
+  {
+    name: 'Spice Route Kitchen',
+    slug: 'spice-route-kitchen',
+    description: 'Aromatic and slow-cooked North Indian delicacies and Biryanis.',
+    cuisines: ['North Indian', 'Biryani'],
+    image: 'https://images.unsplash.com/photo-1585938338392-50a59970d8ee?auto=format&fit=crop&w=900&q=80',
+    logo: 'https://images.unsplash.com/photo-1585938338392-50a59970d8ee?auto=format&fit=crop&w=150&q=80',
+    rating: 4.5,
+    avgPrepTime: 35,
+    address: { city: 'Bengaluru', area: 'Indiranagar' },
+    isOpen: true,
+    isFeatured: true,
+    categories: ['Biryani'],
+  },
+  {
+    name: 'Crust & Co.',
+    slug: 'crust-co',
+    description: 'Wood-fired gourmet pizzas and Italian classics.',
+    cuisines: ['Pizza', 'Italian'],
+    image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=900&q=80',
+    logo: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=150&q=80',
+    rating: 4.4,
+    avgPrepTime: 25,
+    address: { city: 'Bengaluru', area: 'Koramangala' },
+    isOpen: true,
+    isFeatured: true,
+    categories: ['Pizza'],
+  },
+  {
+    name: 'Patty Theory',
+    slug: 'patty-theory',
+    description: 'Artisanal burgers stacked with premium ingredients.',
+    cuisines: ['Burgers', 'American'],
+    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=900&q=80',
+    logo: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=150&q=80',
+    rating: 4.3,
+    avgPrepTime: 20,
+    address: { city: 'Bengaluru', area: 'Jayanagar' },
+    isOpen: true,
+    isFeatured: false,
+    categories: ['Burger'],
+  },
+  {
+    name: 'Wok This Way',
+    slug: 'wok-this-way',
+    description: 'Fresh stir-fried noodles and Pan-Asian comfort food.',
+    cuisines: ['Noodles', 'Pan-Asian'],
+    image: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=900&q=80',
+    logo: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=150&q=80',
+    rating: 4.2,
+    avgPrepTime: 22,
+    address: { city: 'Bengaluru', area: 'Whitefield' },
+    isOpen: true,
+    isFeatured: false,
+    categories: ['Noodles'],
+  },
+  {
+    name: 'Sweet Tooth Bakehouse',
+    slug: 'sweet-tooth-bakehouse',
+    description: 'Delectable desserts, pastries, and baked treats.',
+    cuisines: ['Dessert', 'Bakery'],
+    image: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=900&q=80',
+    logo: 'https://images.unsplash.com/photo-1551024601-bec78aea704b?auto=format&fit=crop&w=150&q=80',
+    rating: 4.6,
+    avgPrepTime: 15,
+    address: { city: 'Bengaluru', area: 'MG Road' },
+    isOpen: true,
+    isFeatured: true,
+    categories: ['Dessert'],
+  },
+  {
+    name: 'Morning Brew Café',
+    slug: 'morning-brew-cafe',
+    description: 'All-day breakfast classics paired with premium coffee and tea.',
+    cuisines: ['Breakfast', 'Beverage'],
+    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=80',
+    logo: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=150&q=80',
+    rating: 4.1,
+    avgPrepTime: 18,
+    address: { city: 'Bengaluru', area: 'HSR Layout' },
+    isOpen: true,
+    isFeatured: false,
+    categories: ['Breakfast', 'Beverage'],
+  },
+  {
+    name: 'Green Bowl Co.',
+    slug: 'green-bowl-co',
+    description: 'Nutritious salads and protein-packed healthy bowls.',
+    cuisines: ['Salad', 'Bowls'],
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80',
+    logo: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=150&q=80',
+    rating: 4.4,
+    avgPrepTime: 20,
+    address: { city: 'Bengaluru', area: 'Sadashivanagar' },
+    isOpen: true,
+    isFeatured: false,
+    categories: ['Salad', 'Bowls'],
+  },
+  {
+    name: 'Wrap Culture',
+    slug: 'wrap-culture',
+    description: 'Loaded rolls and wraps with bold, flavorful fillings.',
+    cuisines: ['Wrap', 'Fast Food'],
+    image: 'https://images.unsplash.com/photo-1621518848576-998a6b0f40b6?auto=format&fit=crop&w=900&q=80',
+    logo: 'https://images.unsplash.com/photo-1621518848576-998a6b0f40b6?auto=format&fit=crop&w=150&q=80',
+    rating: 4.0,
+    avgPrepTime: 15,
+    address: { city: 'Bengaluru', area: 'Electronic City' },
+    isOpen: true,
+    isFeatured: false,
+    categories: ['Wrap'],
+  },
+];
+
 const dishDescriptors = [
   'Smoked',
   'Charred',
@@ -69,7 +185,6 @@ const dishNouns = {
   Bowls: ['Teriyaki Bowl', 'Power Bowl', 'Chipotle Bowl', 'Rice Bowl', 'Poke Bowl', 'Buddha Bowl', 'Katsu Bowl', 'Falafel Bowl', 'Paneer Bowl', 'Chicken Bowl', 'Nourish Bowl', 'Harvest Bowl'],
 };
 
-const categoriesByName = Object.fromEntries(categories.map((item) => [item.name, item]));
 const adminPassword = await bcrypt.hash('Admin@1234', 12);
 const customerPassword = await bcrypt.hash('Customer@1234', 12);
 const users = [];
@@ -94,6 +209,7 @@ const clearCollections = async () => {
   await Promise.all([
     User.deleteMany({}),
     Food.deleteMany({}),
+    Restaurant.deleteMany({}),
     Order.deleteMany({}),
     Cart.deleteMany({}),
     Review.deleteMany({}),
@@ -142,23 +258,41 @@ const createCategories = async () => {
   await Category.insertMany(categories);
 };
 
-const createFoods = async () => {
+const createRestaurants = async () => {
+  const restaurantsToInsert = seedRestaurants.map(({ categories: _, ...rest }) => rest);
+  const created = await Restaurant.insertMany(restaurantsToInsert);
+  return created;
+};
+
+const createFoods = async (createdRestaurants) => {
   const documents = [];
 
-  Object.keys(categoriesByName).forEach((categoryName) => {
-    for (let index = 0; index < 12; index += 1) {
-      const name = buildFoodName(categoryName, index);
-      documents.push({
-        name,
-        description: buildFoodDescription(name, categoryName),
-        category: categoryName,
-        image: categoryImages[categoryName],
-        price: randomPrice(120, 780),
-        rating: randomRating(),
-        availability: randomBoolean(0.9),
-        prepTime: randomPrice(8, 28),
-        tags: [categoryName.toLowerCase(), 'fresh', 'chef-special', 'fast-delivery'].slice(0, 4),
-      });
+  createdRestaurants.forEach((rDoc) => {
+    // Find matching template to get categories
+    const template = seedRestaurants.find((r) => r.slug === rDoc.slug);
+    const rCats = template.categories;
+    
+    // We want 6 dishes per restaurant
+    const dishesPerCat = Math.ceil(6 / rCats.length);
+    let count = 0;
+
+    for (const catName of rCats) {
+      for (let i = 0; i < dishesPerCat && count < 6; i++) {
+        const name = buildFoodName(catName, count);
+        documents.push({
+          name,
+          description: buildFoodDescription(name, catName),
+          category: catName,
+          image: categoryImages[catName],
+          price: randomPrice(120, 780),
+          rating: randomRating(),
+          availability: randomBoolean(0.9),
+          prepTime: randomPrice(8, 28),
+          tags: [catName.toLowerCase(), 'fresh', 'chef-special', 'fast-delivery'].slice(0, 4),
+          restaurant: rDoc._id,
+        });
+        count++;
+      }
     }
   });
 
@@ -259,19 +393,37 @@ const seedDatabase = async () => {
   await clearCollections();
   await createCategories();
   await createUsers();
-  await createFoods();
+  const createdRestaurants = await createRestaurants();
+  await createFoods(createdRestaurants);
   await createReviews();
   await createSampleCarts();
   await createSampleOrders();
 
+  // Warm foods cache
   const data = await foodService.list({});
   const plainData = JSON.parse(JSON.stringify(data));
   await cacheService.set('cache:/api/v1/foods', { success: true, data: plainData }, 3600);
 
-  const foods = await Food.find({ isActive: true });
-  for (const food of foods) {
+  const foodsList = await Food.find({ isActive: true });
+  for (const food of foodsList) {
     const plainFood = JSON.parse(JSON.stringify(food));
     await cacheService.set(`cache:/api/v1/foods/${food._id.toString()}`, { success: true, data: plainFood }, 3600);
+  }
+
+  // Warm restaurants cache
+  const { restaurantService } = await import('../services/restaurantService.js');
+  const rData = await restaurantService.list({});
+  const plainRData = JSON.parse(JSON.stringify(rData));
+  await cacheService.set('cache:/api/v1/restaurants', { success: true, data: plainRData }, 3600);
+
+  const restaurantsList = await Restaurant.find({ isDeleted: { $ne: true } });
+  for (const r of restaurantsList) {
+    const foodsResult = await foodService.list({ restaurant: r._id.toString(), limit: 100 });
+    const plainR = JSON.parse(JSON.stringify({
+      restaurant: r,
+      foods: foodsResult.foods,
+    }));
+    await cacheService.set(`cache:/api/v1/restaurants/${r._id.toString()}`, { success: true, data: plainR }, 3600);
   }
 };
 

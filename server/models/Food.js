@@ -12,6 +12,7 @@ const foodSchema = new mongoose.Schema(
     availability: { type: Boolean, default: true, index: true },
     prepTime: { type: Number, default: 15 },
     tags: [{ type: String, trim: true }],
+    restaurant: { type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant', required: true, index: true },
   },
   { timestamps: true }
 );

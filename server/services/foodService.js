@@ -21,6 +21,10 @@ const buildFilter = (query) => {
     filter.availability = query.availability === 'true';
   }
 
+  if (query.restaurant) {
+    filter.restaurant = query.restaurant;
+  }
+
   return filter;
 };
 

@@ -5,6 +5,7 @@ import { cartService } from '../services/cartService.js';
 import { Cart } from '../models/Cart.js';
 import { Food } from '../models/Food.js';
 import { User } from '../models/User.js';
+import { Restaurant } from '../models/Restaurant.js';
 
 test('cart operations work correctly with null food item in database', async () => {
   const mongoServer = await MongoMemoryServer.create();
@@ -40,6 +41,17 @@ test('cart operations work correctly with null food item in database', async () 
   expect(cart1.items).toHaveLength(0);
 
   // 2. Try to update cart item (should succeed and save the cart)
+  const restaurant = await Restaurant.create({
+    name: 'Spice Route Kitchen',
+    slug: 'spice-route-kitchen',
+    description: 'Aromatic Biryanis.',
+    cuisines: ['North Indian', 'Biryani'],
+    image: 'spice.png',
+    avgPrepTime: 35,
+    address: { city: 'Bengaluru', area: 'Indiranagar' },
+    isOpen: true,
+  });
+
   const food = await Food.create({
     name: 'Pizza',
     price: 100,
@@ -47,6 +59,7 @@ test('cart operations work correctly with null food item in database', async () 
     description: 'Yummy pizza',
     category: 'Pizza',
     isAvailable: true,
+    restaurant: restaurant._id,
   });
 
   const cart2 = await cartService.updateItem(user._id, food._id.toString(), 3);
