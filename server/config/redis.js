@@ -82,8 +82,26 @@ export const getRedisClient = () => {
     port,
     username: username || undefined,
     password: password || undefined,
-    maxRetriesPerRequest: null,
+    // Bounded, not null: with maxRetriesPerRequest: null, ioredis queues
+    // commands indefinitely while disconnected/reconnecting instead of
+    // rejecting them, which means any `await cacheService.get(...)` (used
+    // on every cached GET route, e.g. cacheMiddleware) can hang forever
+    // during a Redis outage or slow reconnect — and since that's awaited
+    // inside an Express request handler, the whole HTTP response hangs
+    // with it, which is exactly what an infinite client-side loading
+    // spinner looks like. A small bounded retry count means a command
+    // fails fast (cacheService's try/catch already turns that into a
+    // graceful null/false) instead of blocking the request indefinitely.
+    maxRetriesPerRequest: 3,
     enableReadyCheck: true,
+    // Don't queue commands issued while disconnected; fail them immediately
+    // so cacheService's try/catch can fall back to "no cache" right away
+    // instead of waiting for a reconnect that may take many seconds.
+    enableOfflineQueue: false,
+    // Cap how long ioredis will wait for a command to come back before
+    // treating it as failed, so a half-open connection can't silently
+    // block a request forever even while nominally "connected".
+    commandTimeout: 3000,
     retryStrategy: (times) => {
       return Math.min(times * 500, 10000);
     },
