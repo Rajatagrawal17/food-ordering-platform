@@ -9,6 +9,7 @@ import { useNotifications } from '../../context/NotificationContext';
 
 const navItems = [
   { label: 'Home', to: ROUTES.HOME },
+  { label: 'Restaurants', to: ROUTES.RESTAURANTS },
   { label: 'Menu', to: ROUTES.MENU },
   { label: 'Orders', to: ROUTES.ORDERS },
   { label: 'Cart', to: ROUTES.CART },

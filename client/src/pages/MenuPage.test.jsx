@@ -33,6 +33,12 @@ vi.mock('../services/categoryService', () => ({
   },
 }));
 
+vi.mock('../services/restaurantService', () => ({
+  restaurantService: {
+    list: vi.fn().mockResolvedValue({ restaurants: [{ _id: 'r-1', name: 'Spice Route Kitchen' }] }),
+  },
+}));
+
 import MenuPage from './MenuPage';
 
 describe('MenuPage', () => {

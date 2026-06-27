@@ -10,5 +10,7 @@ export const ROUTES = {
   PROFILE: '/profile',
   WISHLIST: '/wishlist',
   ADMIN: '/admin',
+  RESTAURANTS: '/restaurants',
+  RESTAURANT_DETAILS: '/restaurants/:id',
   NOT_FOUND: '*',
 };

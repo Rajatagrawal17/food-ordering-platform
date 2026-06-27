@@ -1,7 +1,7 @@
 import { SelectField } from '../forms/SelectField';
 import { TextField } from '../forms/TextField';
 
-export const FoodFilters = ({ search, category, availability, categories = [], onChange }) => {
+export const FoodFilters = ({ search, category, availability, restaurant, categories = [], restaurants = [], onChange }) => {
   return (
     <div className="menu-toolbar">
       <div className="menu-toolbar__row">
@@ -11,6 +11,14 @@ export const FoodFilters = ({ search, category, availability, categories = [], o
           value={search}
           onChange={(event) => onChange({ search: event.target.value })}
         />
+        <SelectField label="Restaurant" value={restaurant} onChange={(event) => onChange({ restaurant: event.target.value })}>
+          <option value="">All restaurants</option>
+          {restaurants.map((item) => (
+            <option key={item._id} value={item._id}>
+              {item.name}
+            </option>
+          ))}
+        </SelectField>
         <SelectField label="Category" value={category} onChange={(event) => onChange({ category: event.target.value })}>
           <option value="">All categories</option>
           {categories.map((item) => (

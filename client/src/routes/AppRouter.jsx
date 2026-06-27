@@ -17,6 +17,8 @@ const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 const WishlistPage = lazy(() => import('../pages/WishlistPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+const RestaurantsPage = lazy(() => import('../pages/RestaurantsPage'));
+const RestaurantDetailPage = lazy(() => import('../pages/RestaurantDetailPage'));
 
 export default function AppRouter() {
   return (
@@ -78,6 +80,8 @@ export default function AppRouter() {
               </ProtectedRoute>
             }
           />
+          <Route path={ROUTES.RESTAURANTS.slice(1)} element={<RestaurantsPage />} />
+          <Route path={ROUTES.RESTAURANT_DETAILS.slice(1)} element={<RestaurantDetailPage />} />
           <Route path={ROUTES.NOT_FOUND} element={<NotFoundPage />} />
         </Route>
         <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />

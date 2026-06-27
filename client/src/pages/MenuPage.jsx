@@ -4,31 +4,36 @@ import { FoodGrid } from '../components/food/FoodGrid';
 import { Spinner } from '../components/common/Spinner';
 import { foodService } from '../services/foodService';
 import { categoryService } from '../services/categoryService';
+import { restaurantService } from '../services/restaurantService';
 import { useCart } from '../hooks/useCart';
 
 export default function MenuPage() {
   const { addItem } = useCart();
   const [foods, setFoods] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({ search: '', category: '', availability: '', sort: 'newest' });
+  const [filters, setFilters] = useState({ search: '', category: '', availability: '', restaurant: '', sort: 'newest' });
   const deferredSearch = useDeferredValue(filters.search);
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [foodsResponse, categoriesResponse] = await Promise.all([
+        const [foodsResponse, categoriesResponse, restaurantsResponse] = await Promise.all([
           foodService.list({
-          search: deferredSearch,
-          category: filters.category,
-          availability: filters.availability,
+            search: deferredSearch,
+            category: filters.category,
+            availability: filters.availability,
+            restaurant: filters.restaurant,
           }),
           categoryService.list(),
+          restaurantService.list(),
         ]);
         setFoods(foodsResponse.foods ?? []);
         setCategories(categoriesResponse ?? []);
+        setRestaurants(restaurantsResponse.restaurants ?? []);
       } catch {
         setError('Unable to load menu right now.');
       } finally {
@@ -37,7 +42,7 @@ export default function MenuPage() {
     };
 
     loadData();
-  }, [deferredSearch, filters.category, filters.availability]);
+  }, [deferredSearch, filters.category, filters.availability, filters.restaurant]);
 
   const sortedFoods = useMemo(() => {
     const items = [...foods];
@@ -75,7 +80,9 @@ export default function MenuPage() {
         search={filters.search}
         category={filters.category}
         availability={filters.availability}
+        restaurant={filters.restaurant}
         categories={categories}
+        restaurants={restaurants}
         onChange={handleFilterChange}
       />
 

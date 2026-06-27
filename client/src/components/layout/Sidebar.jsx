@@ -5,6 +5,7 @@ import { useUI } from '../../hooks/useUI';
 
 const items = [
   { label: 'Discover', to: ROUTES.HOME },
+  { label: 'Restaurants', to: ROUTES.RESTAURANTS },
   { label: 'Browse Menu', to: ROUTES.MENU },
   { label: 'My Orders', to: ROUTES.ORDERS },
   { label: 'Checkout', to: ROUTES.CHECKOUT },
