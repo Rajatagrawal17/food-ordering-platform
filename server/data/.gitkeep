@@ -1,0 +1,3 @@
+# This directory holds Kaggle CSV files for the seed:kaggle script.
+# The CSV files are excluded from version control (.gitignore).
+# See docs/seeding.md for instructions on obtaining and placing them.
