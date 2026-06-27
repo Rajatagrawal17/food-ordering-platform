@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { storage } from '../utils/storage';
+import { securityService } from '../services/securityService';
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api/v1',
@@ -11,9 +12,8 @@ const refreshClient = axios.create({
   withCredentials: true,
 });
 
-httpClient.interceptors.request.use((config) => {
+httpClient.interceptors.request.use(async (config) => {
   const token = storage.get('accessToken');
-  const csrfToken = storage.get('csrfToken');
   const method = config.method?.toLowerCase();
   config.headers = config.headers ?? {};
 
@@ -21,8 +21,20 @@ httpClient.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
-  if (csrfToken && !['get', 'head', 'options'].includes(method ?? 'get')) {
-    config.headers['x-csrf-token'] = csrfToken;
+  if (!['get', 'head', 'options'].includes(method ?? 'get')) {
+    // Wait for the in-flight CSRF bootstrap to finish rather than reading
+    // storage synchronously. On a cold-starting backend (Render free tier
+    // can take seconds, occasionally tens of seconds, to wake up) or on a
+    // fast form submission right after page load, the token may not be in
+    // storage yet even though a fetch for it is already underway. Racing
+    // ahead without it means the request goes out with no x-csrf-token
+    // header at all, and the server correctly rejects it with 403 — that
+    // is not a backend bug, it is this client sending an incomplete request.
+    const csrfToken = await securityService.whenCsrfReady();
+
+    if (csrfToken) {
+      config.headers['x-csrf-token'] = csrfToken;
+    }
   }
 
   return config;
