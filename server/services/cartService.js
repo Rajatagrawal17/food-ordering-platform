@@ -7,7 +7,18 @@ const populateCart = async (cart) => {
     return cart;
   }
 
-  return cart.populate('items.food');
+  await cart.populate('items.food');
+
+  // Filter out any items referencing deleted or soft-deleted food items
+  const originalLength = cart.items.length;
+  cart.items = cart.items.filter((item) => item.food !== null && item.food !== undefined);
+
+  // If any deleted/soft-deleted items were removed, save the cleaned-up cart to DB
+  if (cart.items.length < originalLength) {
+    await cart.save();
+  }
+
+  return cart;
 };
 
 export const cartService = {
@@ -28,7 +39,7 @@ export const cartService = {
     }
 
     const cart = (await cartRepository.findByUserRaw(userId)) ?? (await cartRepository.createOrReplace(userId, { items: [] }));
-    const existingItem = cart.items.find((item) => item.food.toString() === foodId);
+    const existingItem = cart.items.find((item) => item.food && item.food.toString() === foodId);
 
     if (existingItem) {
       existingItem.quantity = quantity;

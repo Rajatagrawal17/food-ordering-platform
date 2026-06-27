@@ -19,4 +19,11 @@ const cartSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+cartSchema.pre('validate', function (next) {
+  if (this.items) {
+    this.items = this.items.filter((item) => item.food !== null && item.food !== undefined);
+  }
+  next();
+});
+
 export const Cart = mongoose.model('Cart', cartSchema);
