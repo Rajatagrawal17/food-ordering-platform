@@ -14,5 +14,14 @@ export const csrfProtection = (req, res, next) => {
   if (req.path === '/api/v1/payments/webhook' || req.path === '/payments/webhook') {
     return next();
   }
-  protection(req, res, next);
+
+  const method = req.method?.toUpperCase();
+  const isStateChanging = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
+  const isCsrfTokenRoute = req.path === '/api/v1/csrf-token' || req.path === '/csrf-token';
+
+  if (isStateChanging || isCsrfTokenRoute) {
+    return protection(req, res, next);
+  }
+
+  next();
 };
