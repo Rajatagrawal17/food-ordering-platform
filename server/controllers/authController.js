@@ -11,7 +11,7 @@ const cookieOptions = {
 const sendAuthResponse = (res, payload, statusCode) => {
   res.cookie('refreshToken', payload.refreshToken, {
     ...cookieOptions,
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    maxAge: 3650 * 24 * 60 * 60 * 1000, // 10 years
   });
 
   res.status(statusCode).json({
@@ -50,7 +50,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
 
   res.cookie('refreshToken', payload.refreshToken, {
     ...cookieOptions,
-    maxAge: 30 * 24 * 60 * 60 * 1000,
+    maxAge: 3650 * 24 * 60 * 60 * 1000, // 10 years
   });
 
   res.status(200).json({
