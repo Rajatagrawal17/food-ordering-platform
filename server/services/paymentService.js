@@ -74,7 +74,7 @@ export const paymentService = {
 
     const currency = 'INR';
     const dummyOrderId = `dummy_upi_order_${Date.now()}`;
-    const dummyPaymentId = `dummy_upi_pay_${Date.now()}`;
+    const dummyPaymentId = `dummy_upi_pay_${upiId}_${Date.now()}`;
 
     const transaction = await paymentRepository.create({
       user: userId,
