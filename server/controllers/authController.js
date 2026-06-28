@@ -48,11 +48,12 @@ export const me = asyncHandler(async (req, res) => {
 
 export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
-  await authService.forgotPassword(email);
+  const result = await authService.forgotPassword(email);
 
   res.status(200).json({
     success: true,
     message: 'Password reset link sent to your email',
+    data: result,
   });
 });
 

@@ -122,7 +122,8 @@ export const authService = {
       resetUrl,
     });
 
-    return true;
+    const isMockMode = !process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS;
+    return isMockMode ? { resetUrl, isMockMode: true } : { isMockMode: false };
   },
   resetPassword: async (token, newPassword) => {
     const client = getRedisClient();

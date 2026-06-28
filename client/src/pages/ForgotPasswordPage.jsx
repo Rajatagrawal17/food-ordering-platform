@@ -22,7 +22,18 @@ export default function ForgotPasswordPage() {
       setIsSubmitting(true);
       setError('');
       const res = await authApi.forgotPassword(email);
-      setMessage(res.message || 'Password reset link sent to your email.');
+      if (res.data?.isMockMode) {
+        setMessage(
+          <>
+            <span>Password reset link generated (Mock Mode): </span>
+            <a href={res.data.resetUrl} style={{ color: 'var(--brand-primary)', textDecoration: 'underline' }}>
+              Click here to reset
+            </a>
+          </>
+        );
+      } else {
+        setMessage(res.message || 'Password reset link sent to your email.');
+      }
     } catch (err) {
       setError('Failed to send reset link. Please check your email or try again later.');
     } finally {
