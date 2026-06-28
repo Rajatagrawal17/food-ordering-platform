@@ -5,6 +5,10 @@ export const paymentApi = {
     const response = await httpClient.post('/payments/create-order', payload);
     return response.data;
   },
+  dummyUPI: async (payload) => {
+    const response = await httpClient.post('/payments/dummy-upi', payload);
+    return response.data;
+  },
   verify: async (payload) => {
     const response = await httpClient.post('/payments/verify', payload);
     return response.data;

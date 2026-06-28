@@ -10,6 +10,15 @@ export const createPaymentIntent = asyncHandler(async (req, res) => {
   });
 });
 
+export const processDummyUPI = asyncHandler(async (req, res) => {
+  const data = await paymentService.processDummyUPI(req.user._id, req.body.address, req.body.couponCode, req.body.upiId);
+
+  res.status(201).json({
+    success: true,
+    data,
+  });
+});
+
 export const verifyPayment = asyncHandler(async (req, res) => {
   const order = await paymentService.verifyPayment(req.body);
 

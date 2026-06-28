@@ -165,9 +165,24 @@ export default function OrderDetailsPage() {
             {retryError && <div className="field__error" style={{ marginTop: '0.5rem' }}>{retryError}</div>}
           </div>
         )}
+        {order.estimatedDeliveryTime && (order.orderStatus === 'placed' || order.orderStatus === 'confirmed' || order.orderStatus === 'preparing' || order.orderStatus === 'out_for_delivery') && (
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(255, 127, 50, 0.1)', borderRadius: '8px', border: '1px solid rgba(255, 127, 50, 0.2)' }}>
+            <strong style={{ color: 'var(--brand-primary)', display: 'block', marginBottom: '0.25rem' }}>Estimated Delivery Time</strong>
+            <span style={{ fontSize: '1.1rem', fontWeight: 600 }}>
+              {new Date(order.estimatedDeliveryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="panel" style={{ background: '#ffffff', borderRadius: '12px', padding: '1.5rem', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+        
+        <div style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #e5e7eb' }}>
+          <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>Payment Info</h3>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: '#6b7280' }}>
+            Paid via: <strong style={{ color: '#374151' }}>{order.paymentMethod === 'dummy_upi' ? 'Dummy UPI' : 'Razorpay'}</strong>
+          </p>
+        </div>
         {order.items.map((item) => {
           const foodId = item.food._id ?? item.food;
           const isReviewed = reviewedItems[foodId];

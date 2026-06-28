@@ -23,6 +23,95 @@ const buildOrderAmount = (cart) => {
 };
 
 export const paymentService = {
+  processDummyUPI: async (userId, address, couponCode, upiId) => {
+    const cart = await cartRepository.findByUser(userId);
+
+    if (!cart || cart.items.length === 0) {
+      throw new ApiError(400, 'Cart is empty');
+    }
+
+    const baseAmount = buildOrderAmount(cart);
+    let amount = baseAmount;
+    let discount = 0;
+
+    if (couponCode) {
+      const coupon = await couponRepository.findByCode(couponCode.toUpperCase());
+      if (!coupon) {
+        throw new ApiError(400, 'Coupon code is invalid');
+      }
+      if (coupon.expirationDate < new Date()) {
+        throw new ApiError(400, 'Coupon code has expired');
+      }
+      if (coupon.usedCount >= coupon.usageLimit) {
+        throw new ApiError(400, 'Coupon usage limit has been reached');
+      }
+      if (coupon.discountType === 'percentage') {
+        discount = Number(((baseAmount * coupon.discountValue) / 100).toFixed(2));
+      } else if (coupon.discountType === 'fixed') {
+        discount = Math.min(coupon.discountValue, baseAmount);
+      }
+      amount = Number((baseAmount - discount).toFixed(2));
+    }
+
+    const estimatedDeliveryTime = new Date(Date.now() + 45 * 60 * 1000); // 45 minutes ETA
+
+    const order = await orderRepository.create({
+      user: userId,
+      items: cart.items.map((item) => ({
+        food: item.food._id ?? item.food,
+        name: item.name,
+        image: item.image,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+      amount,
+      paymentStatus: 'paid',
+      orderStatus: 'confirmed',
+      paymentMethod: 'dummy_upi',
+      estimatedDeliveryTime,
+      address,
+    });
+
+    const currency = 'INR';
+    const dummyOrderId = `dummy_upi_order_${Date.now()}`;
+    const dummyPaymentId = `dummy_upi_pay_${Date.now()}`;
+
+    const transaction = await paymentRepository.create({
+      user: userId,
+      cart: buildCartSnapshot(cart),
+      address,
+      amount,
+      currency,
+      razorpayOrderId: dummyOrderId,
+      razorpayPaymentId: dummyPaymentId,
+      razorpaySignature: 'dummy_signature',
+      status: 'successful',
+      order: order._id,
+      couponCode: couponCode ? couponCode.toUpperCase() : undefined,
+      discount,
+    });
+
+    await orderRepository.updateById(order._id, { paymentTransaction: transaction._id });
+
+    if (couponCode) {
+      const coupon = await couponRepository.findByCode(couponCode.toUpperCase());
+      if (coupon) {
+        await couponRepository.incrementUsedCount(coupon._id);
+      }
+    }
+
+    await cartRepository.clear(userId);
+    emitOrderCreated(userId.toString(), order);
+    emitOrderStatusUpdated(userId.toString(), order);
+    emitPaymentEvent(userId.toString(), {
+      status: 'successful',
+      orderId: order._id,
+    });
+
+    systemEvents.emit(EVENTS.ORDER_CREATED, order);
+
+    return order;
+  },
   createPaymentIntent: async (userId, address, couponCode) => {
     const cart = await cartRepository.findByUser(userId);
 
@@ -135,9 +224,12 @@ export const paymentService = {
       throw new ApiError(400, 'Payment verification failed');
     }
 
+    const estimatedDeliveryTime = new Date(Date.now() + 45 * 60 * 1000); // 45 mins
+
     const order = await orderRepository.updateById(transaction.order, {
       paymentStatus: 'paid',
       orderStatus: 'confirmed',
+      estimatedDeliveryTime,
     });
 
     await paymentRepository.updateByRazorpayOrderId(razorpayOrderId, {
@@ -214,9 +306,12 @@ export const paymentService = {
         return { status: 'already_processed' };
       }
 
+      const estimatedDeliveryTime = new Date(Date.now() + 45 * 60 * 1000);
+
       const order = await orderRepository.updateById(transaction.order, {
         paymentStatus: 'paid',
         orderStatus: 'confirmed',
+        estimatedDeliveryTime,
       });
 
       await paymentRepository.updateByRazorpayOrderId(razorpayOrderId, {

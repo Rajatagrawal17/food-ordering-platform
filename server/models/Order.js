@@ -18,7 +18,9 @@ const orderSchema = new mongoose.Schema(
     amount: { type: Number, required: true, min: 0 },
     paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending', index: true },
     orderStatus: { type: String, enum: ['placed', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'], default: 'placed', index: true },
+    paymentMethod: { type: String, enum: ['razorpay', 'dummy_upi'], default: 'razorpay' },
     paymentTransaction: { type: mongoose.Schema.Types.ObjectId, ref: 'PaymentTransaction' },
+    estimatedDeliveryTime: { type: Date },
     address: {
       label: { type: String, trim: true },
       street: { type: String, trim: true, required: true },

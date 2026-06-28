@@ -22,6 +22,8 @@ export default function CheckoutPage() {
   const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState(null);
   const [couponSuccess, setCouponSuccess] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('dummy_upi');
+  const [upiId, setUpiId] = useState('');
   const { subtotal, clearCart } = useCart();
   const navigate = useNavigate();
 
@@ -55,6 +57,23 @@ export default function CheckoutPage() {
     }
 
     try {
+      if (paymentMethod === 'dummy_upi') {
+        if (!upiId) {
+          setSubmitError('Please enter a valid UPI ID');
+          return;
+        }
+        
+        const order = await paymentService.dummyUPI({
+          address: form,
+          couponCode: appliedCoupon ? appliedCoupon.code : undefined,
+          upiId,
+        });
+
+        await clearCart();
+        navigate(`${ROUTES.ORDERS}/${order._id}`, { replace: true });
+        return;
+      }
+
       const paymentIntent = await paymentService.createIntent({
         address: form,
         couponCode: appliedCoupon ? appliedCoupon.code : undefined,
@@ -117,6 +136,42 @@ export default function CheckoutPage() {
           <TextField label="Postal code" value={form.postalCode} onChange={(event) => setForm({ ...form, postalCode: event.target.value })} error={errors.postalCode} />
           <TextField label="Country" value={form.country} onChange={(event) => setForm({ ...form, country: event.target.value })} error={errors.country} />
           {submitError ? <div className="field__error">{submitError}</div> : null}
+
+          <div style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
+            <h3 style={{ marginBottom: '1rem' }}>Payment Method</h3>
+            <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="dummy_upi"
+                  checked={paymentMethod === 'dummy_upi'}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
+                Dummy UPI (Testing)
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="razorpay"
+                  checked={paymentMethod === 'razorpay'}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                />
+                Razorpay
+              </label>
+            </div>
+            
+            {paymentMethod === 'dummy_upi' && (
+              <TextField
+                label="UPI ID"
+                placeholder="e.g. user@okhdfcbank"
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+              />
+            )}
+          </div>
+
           <div className="form-actions">
             <Button type="submit">Place order</Button>
           </div>
