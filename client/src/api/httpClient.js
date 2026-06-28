@@ -3,12 +3,12 @@ import { storage } from '../utils/storage';
 import { securityService } from '../services/securityService';
 
 const httpClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.PROD ? '/api/v1' : (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api/v1'),
   withCredentials: true,
 });
 
 const refreshClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.PROD ? '/api/v1' : (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api/v1'),
   withCredentials: true,
 });
 
