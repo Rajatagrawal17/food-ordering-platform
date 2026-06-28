@@ -124,7 +124,7 @@ test('verifies payment and creates order', async () => {
     razorpaySignature: signature,
   });
 
-  expect(updateOrder).toHaveBeenCalledWith('order-1', { paymentStatus: 'paid', orderStatus: 'confirmed' });
+  expect(updateOrder).toHaveBeenCalledWith('order-1', { paymentStatus: 'paid', orderStatus: 'confirmed', estimatedDeliveryTime: expect.any(Date) });
   expect(clearCart).toHaveBeenCalledWith('user-1');
   expect(order._id).toBe('order-1');
 });
@@ -186,6 +186,6 @@ test('verifies payment with coupon and increments its used count', async () => {
     razorpaySignature: signature,
   });
 
-  expect(updateOrder).toHaveBeenCalledWith('order-2', { paymentStatus: 'paid', orderStatus: 'confirmed' });
+  expect(updateOrder).toHaveBeenCalledWith('order-2', { paymentStatus: 'paid', orderStatus: 'confirmed', estimatedDeliveryTime: expect.any(Date) });
   expect(incrementUsedCount).toHaveBeenCalledWith('coupon-1');
 });
