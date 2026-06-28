@@ -91,7 +91,13 @@ app.use(express.json({
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(csrfProtection);
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev', { stream: logger.stream }));
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+
+app.use(morgan(isProduction ? 'combined' : 'dev', { stream: logger.stream }));
+
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
 let generalLimiterMiddleware = (req, res, next) => next();
 let authLimiterMiddleware = (req, res, next) => next();
 let checkoutLimiterMiddleware = (req, res, next) => next();
@@ -157,9 +163,7 @@ const checkoutLimiter = (req, res, next) => {
 
 app.use(generalLimiter);
 
-if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1);
-}
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
