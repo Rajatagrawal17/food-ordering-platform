@@ -17,7 +17,6 @@ import { logger } from './config/logger.js';
 import { configureCloudinary } from './config/cloudinary.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { notFound } from './middleware/notFound.js';
-import { csrfProtection } from './middleware/csrf.js';
 import authRoutes from './routes/authRoutes.js';
 import foodRoutes from './routes/foodRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
@@ -27,7 +26,6 @@ import paymentRoutes from './routes/paymentRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
-import securityRoutes from './routes/securityRoutes.js';
 import healthRoutes from './routes/healthRoutes.js';
 import { initializeSocket } from './socket/index.js';
 import { initializeWorker } from './utils/worker.js';
@@ -90,7 +88,7 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(csrfProtection);
+
 const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
 
 app.use(morgan(isProduction ? 'combined' : 'dev', { stream: logger.stream }));

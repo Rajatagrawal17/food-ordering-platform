@@ -1,6 +1,5 @@
 import { createContext, useEffect, useMemo, useState } from 'react';
 import { authService } from '../services/authService';
-import { securityService } from '../services/securityService';
 
 export const AuthContext = createContext(null);
 
@@ -12,8 +11,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const bootstrap = async () => {
-      await securityService.refreshCsrfToken();
-
       if (!token) {
         setStatus('anonymous');
         return;
