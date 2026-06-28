@@ -13,10 +13,6 @@ export const authApi = {
     const response = await httpClient.post('/auth/logout');
     return response.data;
   },
-  refresh: async () => {
-    const response = await httpClient.post('/auth/refresh');
-    return response.data;
-  },
   me: async () => {
     const response = await httpClient.get('/auth/me');
     return response.data;

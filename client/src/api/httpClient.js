@@ -6,10 +6,6 @@ const httpClient = axios.create({
   withCredentials: true,
 });
 
-const refreshClient = axios.create({
-  baseURL: import.meta.env.PROD ? '/api/v1' : (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5000/api/v1'),
-  withCredentials: true,
-});
 
 httpClient.interceptors.request.use(async (config) => {
   const token = storage.get('accessToken');
@@ -25,34 +21,14 @@ httpClient.interceptors.request.use(async (config) => {
   return config;
 });
 
-refreshClient.interceptors.request.use(async (config) => {
-  const method = config.method?.toLowerCase();
-  config.headers = config.headers ?? {};
-
-
-
-  return config;
-});
 
 httpClient.interceptors.response.use(
   (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      originalRequest.headers = originalRequest.headers ?? {};
-
-      try {
-        const response = await refreshClient.post('/auth/refresh');
-        storage.set('accessToken', response.data.data.accessToken);
-        originalRequest.headers.Authorization = `Bearer ${response.data.data.accessToken}`;
-        return httpClient(originalRequest);
-      } catch {
-        storage.remove('accessToken');
-      }
+  (error) => {
+    if (error.response?.status === 401) {
+      storage.remove('accessToken');
+      storage.remove('currentUser');
     }
-
     return Promise.reject(error);
   }
 );

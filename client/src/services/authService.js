@@ -22,12 +22,6 @@ export const authService = {
     storage.remove(ACCESS_TOKEN_KEY);
     storage.remove(USER_KEY);
   },
-  refresh: async () => {
-    const response = await authApi.refresh();
-    storage.set(ACCESS_TOKEN_KEY, response.data.accessToken);
-    storage.set(USER_KEY, response.data.user);
-    return response.data;
-  },
   me: async () => {
     const response = await authApi.me();
     storage.set(USER_KEY, response.data);

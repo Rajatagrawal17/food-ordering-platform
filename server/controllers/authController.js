@@ -1,18 +1,7 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { authService } from '../services/authService.js';
 
-const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
-const cookieOptions = {
-  httpOnly: true,
-  secure: isProduction,
-  sameSite: isProduction ? 'none' : 'lax',
-};
-
 const sendAuthResponse = (res, payload, statusCode) => {
-  res.cookie('refreshToken', payload.refreshToken, {
-    ...cookieOptions,
-    maxAge: 3650 * 24 * 60 * 60 * 1000, // 10 years
-  });
 
   res.status(statusCode).json({
     success: true,
@@ -34,24 +23,12 @@ export const login = asyncHandler(async (req, res) => {
 });
 
 export const logout = asyncHandler(async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-
-  if (refreshToken) {
-    await authService.logout(refreshToken);
-  }
-
-  res.clearCookie('refreshToken', cookieOptions);
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 });
 
 export const refreshAccessToken = asyncHandler(async (req, res) => {
-  const refreshToken = req.cookies.refreshToken ?? req.body.refreshToken;
+  const refreshToken = req.body.refreshToken;
   const payload = await authService.refresh(refreshToken);
-
-  res.cookie('refreshToken', payload.refreshToken, {
-    ...cookieOptions,
-    maxAge: 3650 * 24 * 60 * 60 * 1000, // 10 years
-  });
 
   res.status(200).json({
     success: true,
