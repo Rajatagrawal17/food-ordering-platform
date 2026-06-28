@@ -8,10 +8,13 @@ import { useCart } from '../hooks/useCart';
 import { paymentService } from '../services/paymentService';
 import { couponService } from '../services/couponService';
 import { loadScript } from '../utils/loadScript';
+import { motion, useReducedMotion } from 'framer-motion';
+import { staggerFadeUpVariants } from '../utils/motionVariants';
 
 const initialState = { street: '', city: '', state: '', postalCode: '', country: 'India' };
 
 export default function CheckoutPage() {
+  const shouldReduceMotion = useReducedMotion();
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
@@ -119,7 +122,13 @@ export default function CheckoutPage() {
           </div>
         </form>
       </div>
-      <aside className="cart-summary">
+      <motion.aside
+        className="cart-summary"
+        variants={shouldReduceMotion ? {} : staggerFadeUpVariants}
+        initial="hidden"
+        animate="visible"
+        custom={0}
+      >
         <h3>Payment preview</h3>
         <p className="muted">Delivery fee and taxes are calculated before placing the order.</p>
         <div className="coupon-section" style={{ marginTop: '1.5rem', marginBottom: '1.5rem' }}>
@@ -163,7 +172,7 @@ export default function CheckoutPage() {
             'No items in cart'
           )}
         </strong>
-      </aside>
+      </motion.aside>
     </section>
   );
 }

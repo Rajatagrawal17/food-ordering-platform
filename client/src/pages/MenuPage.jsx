@@ -7,7 +7,12 @@ import { categoryService } from '../services/categoryService';
 import { restaurantService } from '../services/restaurantService';
 import { useCart } from '../hooks/useCart';
 
+import { motion, useReducedMotion } from 'framer-motion';
+import { staggerFadeUpVariants } from '../utils/motionVariants';
+
 export default function MenuPage() {
+  const shouldReduceMotion = useReducedMotion();
+  const animate = shouldReduceMotion ? 'visible' : undefined;
   const { addItem } = useCart();
   const [foods, setFoods] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -76,15 +81,22 @@ export default function MenuPage() {
         </p>
       </div>
 
-      <FoodFilters
-        search={filters.search}
-        category={filters.category}
-        availability={filters.availability}
-        restaurant={filters.restaurant}
-        categories={categories}
-        restaurants={restaurants}
-        onChange={handleFilterChange}
-      />
+      <motion.div
+        variants={staggerFadeUpVariants}
+        initial="hidden"
+        animate={animate ?? 'visible'}
+        custom={0}
+      >
+        <FoodFilters
+          search={filters.search}
+          category={filters.category}
+          availability={filters.availability}
+          restaurant={filters.restaurant}
+          categories={categories}
+          restaurants={restaurants}
+          onChange={handleFilterChange}
+        />
+      </motion.div>
 
       {loading ? <Spinner label="Loading dishes" /> : null}
       {error ? <div className="empty-state"><h3>{error}</h3></div> : null}

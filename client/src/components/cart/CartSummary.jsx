@@ -1,7 +1,11 @@
 import { formatCurrency } from '../../utils/formatCurrency';
 import { Button } from '../common/Button';
 
+import { motion, useReducedMotion } from 'framer-motion';
+import { pulseVariants } from '../../utils/motionVariants';
+
 export const CartSummary = ({ subtotal, onCheckout, onClear }) => {
+  const shouldReduceMotion = useReducedMotion();
   const tax = Math.round(subtotal * 0.05);
   const delivery = subtotal > 0 ? 49 : 0;
   const total = subtotal + tax + delivery;
@@ -23,7 +27,14 @@ export const CartSummary = ({ subtotal, onCheckout, onClear }) => {
       </div>
       <div className="summary-row">
         <span>Total</span>
-        <strong>{formatCurrency(total)}</strong>
+        <motion.strong
+          key={total}
+          variants={shouldReduceMotion ? {} : pulseVariants}
+          initial="initial"
+          animate="animate"
+        >
+          {formatCurrency(total)}
+        </motion.strong>
       </div>
       <div className="summary-actions">
         <Button onClick={onCheckout}>Proceed to checkout</Button>

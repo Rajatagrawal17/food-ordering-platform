@@ -5,7 +5,11 @@ import { EmptyState } from '../components/common/EmptyState';
 import { orderService } from '../services/orderService';
 import { StatusBadge } from '../components/common/StatusBadge';
 
+import { motion, useReducedMotion } from 'framer-motion';
+import { cardVariants } from '../utils/motionVariants';
+
 export default function OrdersPage() {
+  const shouldReduceMotion = useReducedMotion();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,8 +42,15 @@ export default function OrdersPage() {
         <p className="page__subtitle">Review order status, payment state, and reorder details from one place.</p>
       </div>
       <div className="orders-grid">
-        {orders.map((order) => (
-          <article className="order-card" key={order._id}>
+        {orders.map((order, i) => (
+          <motion.article 
+            className="order-card" 
+            key={order._id}
+            custom={i}
+            variants={shouldReduceMotion ? {} : cardVariants}
+            initial="hidden"
+            animate="visible"
+          >
             <div className="order-meta">
               <StatusBadge value={order.orderStatus} />
               <StatusBadge value={order.paymentStatus} />
@@ -53,7 +64,7 @@ export default function OrdersPage() {
             <Link to={`/orders/${order._id}`} className="button button--secondary">
               View details
             </Link>
-          </article>
+          </motion.article>
         ))}
       </div>
     </section>

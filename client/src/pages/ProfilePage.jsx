@@ -4,7 +4,11 @@ import { profileService } from '../services/profileService';
 import { Button } from '../components/common/Button';
 import { TextField } from '../components/forms/TextField';
 
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { cardVariants } from '../utils/motionVariants';
+
 export default function ProfilePage() {
+  const shouldReduceMotion = useReducedMotion();
   const { user, token } = useAuth();
   const [profileForm, setProfileForm] = useState({ name: '', phone: '' });
   const [addressForm, setAddressForm] = useState({ label: '', street: '', city: '', state: '', postalCode: '', isDefault: false });
@@ -121,19 +125,31 @@ export default function ProfilePage() {
           <p className="muted">No addresses saved yet.</p>
         ) : (
           <div className="grid">
-            {addresses.map((addr, idx) => (
-              <div key={idx} className="address-card" style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', position: 'relative' }}>
-                {addr.isDefault && <span className="badge badge--good" style={{ position: 'absolute', top: '12px', right: '12px' }}>Default</span>}
-                <strong>{addr.label || 'Address'}</strong>
-                <p style={{ margin: '8px 0' }}>
-                  {addr.street}, {addr.city}, {addr.state} - {addr.postalCode}
-                </p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button type="button" onClick={() => handleEditAddress(idx)} style={{ color: '#ff7f32', border: 'none', background: 'none', cursor: 'pointer' }}>Edit</button>
-                  <button type="button" onClick={() => handleDeleteAddress(idx)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Delete</button>
-                </div>
-              </div>
-            ))}
+            <AnimatePresence initial={false}>
+              {addresses.map((addr, idx) => (
+                <motion.div 
+                  key={addr._id ?? idx} 
+                  custom={idx}
+                  variants={shouldReduceMotion ? {} : cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  layout
+                  className="address-card" 
+                  style={{ border: '1px solid #ddd', padding: '16px', borderRadius: '8px', position: 'relative' }}
+                >
+                  {addr.isDefault && <span className="badge badge--good" style={{ position: 'absolute', top: '12px', right: '12px' }}>Default</span>}
+                  <strong>{addr.label || 'Address'}</strong>
+                  <p style={{ margin: '8px 0' }}>
+                    {addr.street}, {addr.city}, {addr.state} - {addr.postalCode}
+                  </p>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button type="button" onClick={() => handleEditAddress(idx)} style={{ color: '#ff7f32', border: 'none', background: 'none', cursor: 'pointer' }}>Edit</button>
+                    <button type="button" onClick={() => handleDeleteAddress(idx)} style={{ color: 'red', border: 'none', background: 'none', cursor: 'pointer' }}>Delete</button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </div>

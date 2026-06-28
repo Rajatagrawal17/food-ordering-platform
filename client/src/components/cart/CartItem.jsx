@@ -1,7 +1,11 @@
 import { formatCurrency } from '../../utils/formatCurrency';
 import { Button } from '../common/Button';
 
+import { motion, useReducedMotion } from 'framer-motion';
+import { pulseVariants } from '../../utils/motionVariants';
+
 export const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
+  const shouldReduceMotion = useReducedMotion();
   const foodId = item.food?._id ?? item.food;
 
   return (
@@ -14,7 +18,15 @@ export const CartItem = ({ item, onIncrease, onDecrease, onRemove }) => {
           <Button variant="secondary" onClick={() => onDecrease(foodId, item.quantity - 1)}>
             -
           </Button>
-          <span className="pill-link">{item.quantity}</span>
+          <motion.span 
+            className="pill-link"
+            key={item.quantity}
+            variants={shouldReduceMotion ? {} : pulseVariants}
+            initial="initial"
+            animate="animate"
+          >
+            {item.quantity}
+          </motion.span>
           <Button variant="secondary" onClick={() => onIncrease(foodId, item.quantity + 1)}>
             +
           </Button>

@@ -10,7 +10,11 @@ import { useAuth } from '../hooks/useAuth';
 import { connectSocket, disconnectSocket, onSocketEvent } from '../services/socketService';
 import { loadScript } from '../utils/loadScript';
 
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { fadeVariants } from '../utils/motionVariants';
+
 export default function OrderDetailsPage() {
+  const shouldReduceMotion = useReducedMotion();
   const { orderId } = useParams();
   const { token } = useAuth();
   const [order, setOrder] = useState(null);
@@ -142,8 +146,16 @@ export default function OrderDetailsPage() {
         <span className="page__eyebrow">Order details</span>
         <h1 className="page__title" style={{ margin: '0.5rem 0' }}>Order #{order._id.slice(-6)}</h1>
         <div className="badge-row" style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-          <StatusBadge value={order.orderStatus} />
-          <StatusBadge value={order.paymentStatus} />
+          <AnimatePresence mode="wait">
+            <motion.div key={order.orderStatus} variants={shouldReduceMotion ? {} : fadeVariants} initial="hidden" animate="visible" exit="exit">
+              <StatusBadge value={order.orderStatus} />
+            </motion.div>
+          </AnimatePresence>
+          <AnimatePresence mode="wait">
+            <motion.div key={order.paymentStatus} variants={shouldReduceMotion ? {} : fadeVariants} initial="hidden" animate="visible" exit="exit">
+              <StatusBadge value={order.paymentStatus} />
+            </motion.div>
+          </AnimatePresence>
         </div>
         {order.paymentStatus === 'pending' && (
           <div style={{ marginTop: '1rem' }}>
