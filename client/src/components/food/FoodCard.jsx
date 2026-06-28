@@ -10,11 +10,12 @@ export const FoodCard = ({ food, onAdd }) => {
   return (
     <motion.article
       className="card"
-      whileHover={shouldReduceMotion ? {} : { y: -4, boxShadow: '0 12px 36px rgba(138,128,116,0.18)' }}
+      whileHover={shouldReduceMotion ? {} : { y: -6, boxShadow: '0 24px 48px rgba(0,0,0,0.8)' }}
       transition={{ duration: 0.2 }}
     >
-      <div className="card__media">
+      <div className="card__media" style={{ position: 'relative' }}>
         <img src={food.image} alt={food.name} loading="lazy" />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(10,10,10,0.9) 0%, transparent 60%)', pointerEvents: 'none' }} />
       </div>
       <div className="card__meta">
         <span className="badge">{food.category}</span>
