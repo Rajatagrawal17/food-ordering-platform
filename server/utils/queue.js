@@ -43,12 +43,12 @@ export const backgroundQueue = {
             continue;
           }
 
-          const result = await client.blpop(QUEUE_KEY, 5);
-          if (!result) {
+          const jobString = await client.lpop(QUEUE_KEY);
+          if (!jobString) {
+            await new Promise((resolve) => setTimeout(resolve, 5000));
             continue;
           }
 
-          const jobString = result[1];
           const job = JSON.parse(jobString);
 
           logger.debug({ type: job.type }, 'Processing background job');
