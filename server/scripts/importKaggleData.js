@@ -41,8 +41,8 @@ const __dirname = path.dirname(__filename);
 // ─── Paths ──────────────────────────────────────────────────────────────────
 
 const DATA_DIR = path.join(__dirname, '../data');
-const RESTAURANTS_CSV = path.join(DATA_DIR, 'restaurants.csv');
-const DISHES_CSV = path.join(DATA_DIR, 'dishes.csv');
+const RESTAURANTS_CSV = path.join(DATA_DIR, 'restaurants_small.csv');
+const DISHES_CSV = path.join(DATA_DIR, 'dishes_small.csv');
 
 // ─── Limits ─────────────────────────────────────────────────────────────────
 
@@ -165,13 +165,22 @@ const findColumn = (headers, candidates) => {
 
 const readCSV = (filepath) => {
   const content = fs.readFileSync(filepath, 'utf8');
-  return parse(content, {
+  const options = {
     columns: true,
     skip_empty_lines: true,
     trim: true,
     relax_column_count: true,
+    relax_quotes: true,
     bom: true,
-  });
+  };
+  try {
+    return parse(content, options);
+  } catch (err) {
+    if (err.code === 'CSV_QUOTE_NOT_CLOSED') {
+      return parse(content + '"\n', options);
+    }
+    throw err;
+  }
 };
 
 // ─── Column mapping: restaurants ─────────────────────────────────────────────
@@ -241,6 +250,9 @@ const clearCollections = async () => {
     PaymentTransaction.deleteMany({}),
   ]);
   const client = getRedisClient();
+  if (client.status !== 'ready') {
+    await new Promise(resolve => client.once('ready', resolve));
+  }
   await client.flushdb();
 };
 
