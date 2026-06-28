@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -29,10 +30,27 @@ export default function RegisterPage() {
     }
 
     try {
+      setIsSubmitting(true);
       await register(form);
       navigate(ROUTES.HOME, { replace: true });
     } catch (requestError) {
-      setSubmitError('Unable to create the account.');
+      const status = requestError.response?.status;
+
+      if (status === 409) {
+        setSubmitError('An account with this email already exists.');
+      } else if (status === 403) {
+        // A 403 here means the CSRF token wasn't valid/present, not that
+        // the account already exists — surfacing this distinctly makes
+        // this class of bug visible from the UI instead of looking like
+        // a generic failure.
+        setSubmitError('Something went wrong securing your request. Please refresh the page and try again.');
+      } else if (status === 429) {
+        setSubmitError('Too many attempts. Please wait a few minutes and try again.');
+      } else {
+        setSubmitError('Unable to create the account. Please try again.');
+      }
+
+      setIsSubmitting(false);
     }
   };
 
@@ -51,7 +69,9 @@ export default function RegisterPage() {
           <TextField label="Phone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} error={errors.phone} />
           {submitError ? <div className="field__error">{submitError}</div> : null}
           <div className="form-actions">
-            <Button type="submit">Register</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating account...' : 'Register'}
+            </Button>
             <Link to={ROUTES.LOGIN} className="button button--secondary">
               Back to login
             </Link>

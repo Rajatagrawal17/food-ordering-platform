@@ -36,7 +36,22 @@ export default function LoginPage() {
       await login(form);
       navigate(redirectTo, { replace: true });
     } catch (requestError) {
-      setSubmitError('Invalid email or password.');
+      const status = requestError.response?.status;
+
+      if (status === 401) {
+        setSubmitError('Invalid email or password.');
+      } else if (status === 403) {
+        // A 403 here means the CSRF token wasn't valid/present, not that
+        // the credentials were wrong — telling the user "invalid email
+        // or password" in this case is actively misleading and makes
+        // this exact class of bug far harder to diagnose from the UI.
+        setSubmitError('Something went wrong securing your request. Please refresh the page and try again.');
+      } else if (status === 429) {
+        setSubmitError('Too many attempts. Please wait a few minutes and try again.');
+      } else {
+        setSubmitError('Unable to sign in right now. Please try again in a moment.');
+      }
+
       setIsSubmitting(false);
     }
   };
