@@ -12,12 +12,18 @@ let csrfReadyPromise = null;
 
 export const securityService = {
   refreshCsrfToken: () => {
-    csrfReadyPromise = (async () => {
-      const response = await securityApi.csrfToken();
-      storage.set(CSRF_TOKEN_KEY, response.data.csrfToken);
-      return response.data.csrfToken;
-    })();
-
+    if (!csrfReadyPromise) {
+      csrfReadyPromise = (async () => {
+        try {
+          const response = await securityApi.csrfToken();
+          storage.set(CSRF_TOKEN_KEY, response.data.csrfToken);
+          return response.data.csrfToken;
+        } catch (error) {
+          csrfReadyPromise = null;
+          throw error;
+        }
+      })();
+    }
     return csrfReadyPromise;
   },
   getCsrfToken: () => storage.get(CSRF_TOKEN_KEY),

@@ -40,6 +40,20 @@ httpClient.interceptors.request.use(async (config) => {
   return config;
 });
 
+refreshClient.interceptors.request.use(async (config) => {
+  const method = config.method?.toLowerCase();
+  config.headers = config.headers ?? {};
+
+  if (!['get', 'head', 'options'].includes(method ?? 'get')) {
+    const csrfToken = await securityService.whenCsrfReady();
+    if (csrfToken) {
+      config.headers['x-csrf-token'] = csrfToken;
+    }
+  }
+
+  return config;
+});
+
 httpClient.interceptors.response.use(
   (response) => response,
   async (error) => {

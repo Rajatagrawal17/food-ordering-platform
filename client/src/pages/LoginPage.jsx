@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState({});
   const [submitError, setSubmitError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,10 +32,12 @@ export default function LoginPage() {
     }
 
     try {
+      setIsSubmitting(true);
       await login(form);
       navigate(redirectTo, { replace: true });
     } catch (requestError) {
       setSubmitError('Invalid email or password.');
+      setIsSubmitting(false);
     }
   };
 
@@ -63,7 +66,9 @@ export default function LoginPage() {
           />
           {submitError ? <div className="field__error">{submitError}</div> : null}
           <div className="form-actions">
-            <Button type="submit">Login</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing in...' : 'Login'}
+            </Button>
             <Link to={ROUTES.REGISTER} className="button button--secondary">
               Create account
             </Link>
