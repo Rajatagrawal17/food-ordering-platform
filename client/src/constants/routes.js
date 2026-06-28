@@ -3,6 +3,8 @@ export const ROUTES = {
   MENU: '/menu',
   LOGIN: '/login',
   REGISTER: '/register',
+  FORGOT_PASSWORD: '/forgot-password',
+  RESET_PASSWORD: '/reset-password/:token',
   CART: '/cart',
   CHECKOUT: '/checkout',
   ORDERS: '/orders',

@@ -9,6 +9,8 @@ const HomePage = lazy(() => import('../pages/HomePage'));
 const MenuPage = lazy(() => import('../pages/MenuPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('../pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage'));
 const CartPage = lazy(() => import('../pages/CartPage'));
 const CheckoutPage = lazy(() => import('../pages/CheckoutPage'));
 const OrdersPage = lazy(() => import('../pages/OrdersPage'));
@@ -29,6 +31,8 @@ export default function AppRouter() {
           <Route path={ROUTES.MENU.slice(1)} element={<MenuPage />} />
           <Route path={ROUTES.LOGIN.slice(1)} element={<LoginPage />} />
           <Route path={ROUTES.REGISTER.slice(1)} element={<RegisterPage />} />
+          <Route path={ROUTES.FORGOT_PASSWORD.slice(1)} element={<ForgotPasswordPage />} />
+          <Route path={ROUTES.RESET_PASSWORD.slice(1)} element={<ResetPasswordPage />} />
           <Route path={ROUTES.CART.slice(1)} element={<CartPage />} />
           <Route
             path={ROUTES.CHECKOUT.slice(1)}

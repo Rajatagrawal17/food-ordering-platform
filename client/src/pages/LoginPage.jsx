@@ -72,13 +72,18 @@ export default function LoginPage() {
             onChange={(event) => setForm({ ...form, email: event.target.value })}
             error={errors.email}
           />
-          <TextField
-            label="Password"
-            type="password"
-            value={form.password}
-            onChange={(event) => setForm({ ...form, password: event.target.value })}
-            error={errors.password}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <TextField
+              label="Password"
+              type="password"
+              value={form.password}
+              onChange={(event) => setForm({ ...form, password: event.target.value })}
+              error={errors.password}
+            />
+            <Link to={ROUTES.FORGOT_PASSWORD} style={{ alignSelf: 'flex-end', fontSize: '0.875rem', color: 'var(--brand-primary)' }}>
+              Forgot password?
+            </Link>
+          </div>
           {submitError ? <div className="field__error">{submitError}</div> : null}
           <div className="form-actions">
             <Button type="submit" disabled={isSubmitting}>
