@@ -17,7 +17,7 @@ const buildFilter = (query) => {
     filter.category = query.category;
   }
 
-  if (query.availability !== undefined) {
+  if (query.availability !== undefined && query.availability !== '') {
     filter.availability = query.availability === 'true';
   }
 
