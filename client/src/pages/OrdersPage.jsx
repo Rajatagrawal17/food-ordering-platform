@@ -42,30 +42,61 @@ export default function OrdersPage() {
         <p className="page__subtitle">Review order status, payment state, and reorder details from one place.</p>
       </div>
       <div className="orders-grid">
-        {orders.map((order, i) => (
-          <motion.article 
-            className="order-card" 
-            key={order._id}
-            custom={i}
-            variants={shouldReduceMotion ? {} : cardVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <div className="order-meta">
-              <StatusBadge value={order.orderStatus} />
-              <StatusBadge value={order.paymentStatus} />
-            </div>
-            <h3>Order #{order._id.slice(-6)}</h3>
-            <p className="muted">{order.items.length} items</p>
-            <div className="summary-row">
-              <span>Amount</span>
-              <strong>₹{order.amount}</strong>
-            </div>
-            <Link to={`/orders/${order._id}`} className="button button--secondary">
-              View details
-            </Link>
-          </motion.article>
-        ))}
+        {orders.map((order, i) => {
+          const isPending = order.orderStatus === 'placed' || order.orderStatus === 'confirmed' || order.orderStatus === 'preparing' || order.orderStatus === 'out_for_delivery';
+          
+          return (
+            <motion.article 
+              className="order-card-next" 
+              key={order._id}
+              custom={i}
+              variants={shouldReduceMotion ? {} : cardVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <div className="order-header">
+                <div className="order-header-left">
+                  <h3>Order #{order._id.slice(-6)}</h3>
+                  <p>{new Date(order.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+                <div className="order-badges">
+                  <StatusBadge value={order.orderStatus} />
+                  <StatusBadge value={order.paymentStatus} />
+                </div>
+              </div>
+
+              {order.estimatedDeliveryTime && isPending && (
+                <div className="order-eta-box">
+                  <span className="eta-label">Estimated Delivery</span>
+                  <span className="eta-time">{new Date(order.estimatedDeliveryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              )}
+
+              <div className="order-items-preview">
+                {order.items.slice(0, 3).map(item => (
+                  <div key={item._id || item.food} className="order-item-line">
+                    <span><span className="qty">{item.quantity}x</span> {item.name}</span>
+                  </div>
+                ))}
+                {order.items.length > 3 && (
+                  <div className="order-item-line" style={{ marginTop: '0.25rem', fontStyle: 'italic' }}>
+                    <span>+ {order.items.length - 3} more items</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="order-footer-next">
+                <div className="total-amount">
+                  <span>Total Amount</span>
+                  <strong>₹{order.amount}</strong>
+                </div>
+                <Link to={`/orders/${order._id}`} className="view-btn">
+                  View details
+                </Link>
+              </div>
+            </motion.article>
+          );
+        })}
       </div>
     </section>
   );
