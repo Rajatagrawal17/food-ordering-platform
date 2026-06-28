@@ -114,7 +114,7 @@ export const authService = {
     await client.set(`password-reset:${token}`, user._id.toString(), 'EX', 3600);
 
     const clientOrigin = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
-    const resetUrl = `${clientOrigin}/reset-password?token=${token}`;
+    const resetUrl = `${clientOrigin}/reset-password/${token}`;
 
     await backgroundQueue.addJob('email:password-reset', {
       email: user.email,
